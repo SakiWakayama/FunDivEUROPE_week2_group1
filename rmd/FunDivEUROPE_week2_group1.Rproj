@@ -1,0 +1,379 @@
+---
+title: "week2_data_analysis_aboutSoilCarbonrate.Rmd"
+author: "Saki.Wakayama"
+date: "2026-02-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+***task***
+est the hypothesis that soil carbon stock (soil.carbon) depends on species richness, altitude, sand cover, annual mean temperature, and precipitation.
+
+
+```{r}
+
+library(tidyverse) 
+
+
+data <- read.csv("../Data/FunDivEUROPE.csv")
+
+
+head(data)
+str(data)
+summary(data)
+
+
+```
+
+```{r}
+# check the data tyoe of each predictor
+
+for(var in names(data)){
+  cat("Variable:", var, "\n")
+  cat("  Class:", class(data[[var]]), "\n")
+  cat("  Unique values:", length(unique(data[[var]])), "\n")
+  cat("  First 5 values:", head(data[[var]],5), "\n\n")
+}
+
+```
+
+```{r}
+#with linear regression and check
+
+#transformation to factor of target species richness
+data$target.species.richness <- as.factor(data$target.species.richness)
+#transformation to factor of sand
+data$sand <- as.factor(data$sand)
+
+#try single linear regression and check statistic 
+lm.soilcarbon.tsr <- lm(soil.carbon ~ target.species.richness, data = data)
+lm.soilcarbon.sd  <- lm(soil.carbon ~ sand, data = data)
+lm.soilcarbon.altitude <- lm(soil.carbon ~ altitude, data = data)
+lm.soilcarbon.temp <- lm(soil.carbon ~ annual.mean.temperature, data = data)
+lm.soilcarbon.preci <- lm(soil.carbon ~ annual.mean.precipitation, data = data)
+
+
+```
+
+```{r}
+
+#check model of target species richness
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.tsr)
+par(mfrow = c(1,1))
+
+
+# check sd
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.sd)
+par(mfrow = c(1,1))
+
+#check altitude
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.altitude) 
+par(mfrow = c(1,1))
+
+#check temp
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.temp)
+par(mfrow = c(1,1))
+
+#check prici
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.preci)
+par(mfrow = c(1,1))
+
+```
+
+```{r}
+#log transformation and try  again lm
+min(data$soil.carbon, na.rm = TRUE)
+data$log.soil.carbon <- log(data$soil.carbon)
+
+lm.sc.log.tsr <- lm(log.soil.carbon ~ target.species.richness, data = data)
+lm.sc.log.sd  <- lm(log.soil.carbon ~ sand, data = data)
+lm.sc.log.altitude <- lm(log.soil.carbon ~ altitude, data = data)
+lm.sc.log.temp <- lm(log.soil.carbon ~ annual.mean.temperature, data = data)
+lm.sc.log.preci <- lm(log.soil.carbon ~ annual.mean.precipitation, data = data)
+```
+
+```{r}
+#check model againl with log
+
+#check model of target species richness
+par(mfrow = c(2,2))
+plot(lm.sc.log.tsr)
+par(mfrow = c(1,1))
+
+
+# check sd
+par(mfrow = c(2,2))
+plot(lm.sc.log.sd)
+par(mfrow = c(1,1))
+
+#check altitude
+par(mfrow = c(2,2))
+plot(lm.sc.log.altitude) 
+par(mfrow = c(1,1))
+
+#check temp
+par(mfrow = c(2,2))
+plot(lm.sc.log.temp)
+par(mfrow = c(1,1))
+
+#check prici
+par(mfrow = c(2,2))
+plot(lm.sc.log.preci)
+par(mfrow = c(1,1))
+
+```
+
+
+```{r}
+#summary
+
+summary(lm.sc.log.tsr)
+
+```
+The target species richness did not have a significant effect on soil carbon stock (F = 0.425, p = 0.79). The differences in predicted values among the richness levels were also not statistically significant. The overall explanatory power of the model was very low (R² = 0.008), suggesting that most of the variation in soil carbon is dependent on other factors.
+
+```{r}
+
+summary(lm.sc.log.sd)
+```
+The type of sand had a significant effect on soil carbon stock (F = 20.28, p < 0.001). Both sand2 and sand3 had significantly lower soil carbon compared to the reference sand type (sand1). The overall explanatory power of the model was 16%, indicating that sand type accounts for a portion of the variation in soil carbon.
+
+```{r}
+summary(lm.sc.log.altitude)
+```
+Altitude had a significant positive effect on soil carbon stock (F = 92.21, p < 0.001), with soil carbon increasing as altitude rises. The overall explanatory power of the model was approximately 31%, indicating that altitude accounts for a portion of the variation in soil carbon.
+
+
+```{r}
+summary(lm.sc.log.temp)
+```
+Annual mean temperature did not have a significant effect on soil carbon stock on its own (F = 1.176, p = 0.28). The overall explanatory power of the model was minimal (R² ≈ 0.006), indicating that variation in soil carbon cannot be explained by temperature alone.
+
+
+```{r}
+summary(lm.sc.log.preci)
+
+```
+Annual mean precipitation had a small but significant negative effect on soil carbon stock (β = -0.00076, p = 0.011). The overall explanatory power of the model was low (R² ≈ 0.03), indicating that precipitation alone cannot account for most of the variation in soil carbon.
+
+Based on the results so far, species richness, temperature, and precipitation cannot be considered as primary explanatory variables for soil carbon on their own. In contrast, altitude and sand type appear to have the potential to act as major single factors influencing soil carbon. Therefore, a base model using altitude and sand as fixed effects should first be constructed, and the distribution of the residuals should be re-examined. After that, models incorporating interaction effects and random effects can be created, visualized, and tested separately.
+
+
+
+```{r}
+# sand, atitude model
+
+lm.sd.at <- lm(log.soil.carbon ~ sand + altitude, data = data)
+
+par(mfrow = c(2, 2))
+plot(lm.sd.at)
+summary(lm.sd.at)
+
+
+```
+
+```{r}
+lm.sd.at.int <- lm(log.soil.carbon ~ sand * altitude, data = data)
+anova(lm.sd.at, lm.sd.at.int)
+
+```
+No interaction was detected between sand and altitude. Adding the sand × altitude interaction to the model did not significantly improve it (F = 0.192, p = 0.826). Therefore, the effects of sand and altitude on soil carbon stock can be adequately explained by their main effects alone.
+```{r}
+#about precipitation
+lm.base <- lm(log.soil.carbon ~ sand + altitude, data = data)
+lm.p <- lm(log.soil.carbon ~ sand + altitude + annual.mean.precipitation, data = data)
+anova(lm.base, lm.p)
+
+```
+
+The effect of annual mean precipitation on soil carbon is only marginally significant, but considering potential influences of random effects, it will be retained as a fixed effect.
+
+Step 1: Visualization of the Base Model with Fixed Effects
+
+The fixed effects to be included are:
+
+Sand (categorical variable)
+
+Altitude (continuous variable)
+
+Annual mean precipitation (continuous variable)
+
+This base model will allow us to visualize the relationships of these key predictors with soil carbon before adding interaction or random effects.
+
+```{r}
+
+library(effects)
+
+
+m_base <- lm(log.soil.carbon ~ sand + altitude + annual.mean.precipitation, data = data)
+
+
+eff_sand <- effect("sand", m_base, partial.residuals = TRUE)
+
+
+plot(eff_sand,
+     main = "",
+     ylab = "log(Soil Carbon)",
+     xlab = "Sand Type")
+
+
+plot(eff_sand,
+     main = "",
+     ylab = "Soil Carbon",
+     xlab = "Sand Type",
+     transformation = list(link = log, inverse = exp))
+
+
+````
+
+```{r}
+ggplot(data, aes(x = altitude, y = log.soil.carbon)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "blue") +
+  ylab("log(Soil Carbon)") +
+  xlab("Altitude (m)") +
+  theme_classic()
+
+```
+```{r}
+
+ggplot(data, aes(x = annual.mean.precipitation, y = log.soil.carbon)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "darkgreen") +
+  ylab("log(Soil Carbon)") +
+  xlab("Annual Mean Precipitation (mm)") +
+  theme_classic()
+
+
+```
+```{r}
+
+#use effect
+
+eff_alt <- effect("altitude", m_base, partial.residuals = TRUE)
+plot(eff_alt,
+     main = "",
+     ylab = "log(Soil Carbon)",
+     xlab = "Altitude")
+
+```
+```{r}
+
+eff_precip <- effect("annual.mean.precipitation", m_base, partial.residuals = TRUE)
+plot(eff_precip,
+     main = "",
+     ylab = "log(Soil Carbon)",
+     xlab = "Annual Precipitation")
+
+```
+
+```{r}
+
+eff_all <- allEffects(m_base, partial.residuals = TRUE)
+plot(eff_all)
+
+```
+```{r}
+library(emmeans)
+anova_sand <- lm(log.soil.carbon ~ sand, data = data)
+emmeans(anova_sand, pairwise ~ sand, adjust = "Tukey")
+
+```
+Based on the model-adjusted estimated means (emmeans), sand type had a clear effect on soil carbon stock. Soil carbon in sand3 was significantly lower than in sand1 and sand2 (sand1–sand3: p < 0.0001, sand2–sand3: p = 0.016), while the difference between sand1 and sand2 was marginally significant (p = 0.056). Overall, this suggests that sand type has a notable influence on soil carbon.
+
+So far, the factors that had significant effects on soil carbon as single predictors were sand, altitude, and annual mean precipitation. Other factors did not show significant effects on soil carbon on their own.
+
+For interaction effects, the following combinations will be examined:
+
+sand × species richness
+
+sand × precipitation
+
+altitude × temperature
+
+altitude × precipitation
+
+precipitation × target species richness
+
+
+```{r}
+#intaraction between sand and target.species.richness
+m_sand_rich <- lm(log.soil.carbon ~ sand*target.species.richness, data = data)
+summary(m_sand_rich)
+```
+There was no interaction between sand and target species richness.
+
+
+```{r}
+#sand and annual.mean.precipitation
+m_sand_precip <- lm(log.soil.carbon ~ sand*annual.mean.precipitation, data = data)
+summary(m_sand_precip)
+
+
+```
+The effect of precipitation reduces the differences in soil carbon among the sand types.
+
+
+
+```{r}
+#altitude and temperature
+m_alt_temp <- lm(log.soil.carbon ~ altitude*annual.mean.temperature, data = data)
+summary(m_alt_temp)
+```
+Altitude mitigates the decrease in soil carbon caused by higher temperatures.
+
+
+
+```{r}
+#altitude and annual.mean,precipitation
+m_alt_precip <- lm(log.soil.carbon ~ altitude*annual.mean.precipitation, data = data)
+summary(m_alt_precip)
+```
+Altitude has a negative effect on the impact of precipitation on soil carbon.
+
+
+```{r}
+m_precip_rich <- lm(log.soil.carbon ~ annual.mean.precipitation*target.species.richness, data = data)
+summary(m_precip_rich)
+```
+
+There is no interaction between precipitation and target species richness.
+
+In summary, the observed interactions among factors are as follows:
+
+The effect of precipitation reduces the differences in soil carbon among sand types.
+
+Altitude mitigates the decrease in soil carbon caused by higher temperatures.
+
+Altitude has a negative effect on the impact of precipitation on soil carbon.
+
+```{r}
+library(ggplot2)
+
+
+data$pred <- predict(m_sand_precip, newdata = data)
+
+
+ggplot(data, aes(x = annual.mean.precipitation, y = log.soil.carbon, color = sand)) +
+  geom_point(alpha = 0.5) +          
+  geom_line(aes(y = pred), size = 1) + 
+  labs(x = "Annual Mean Precipitation", y = "Log Soil Carbon", color = "Sand Type") +
+  theme_minimal()
+
+```
+The annual mean precipitation shows an interesting effect in its interaction with sand type on soil carbon. Sand type had a significant impact on soil carbon (sand2: -1.76, p = 0.0045; sand3: -2.71, p = 0.0020). Additionally, precipitation reduced soil carbon in the reference sand, but this negative effect was mitigated in sand2 and sand3 due to the interaction with sand type. The overall model was significant (F = 17.72, p < 0.001) and explained approximately 30% of the variation in soil carbon (R² = 0.305).
+
+
+
+However, soil carbon may also be influenced by country, litter layer, root biomass, and microbial biomass. Therefore, these factors should be incorporated as random effects or interaction terms, and the changes in fixed effects, as well as factors that were not significant on their own, should be re-evaluated.
+
+
