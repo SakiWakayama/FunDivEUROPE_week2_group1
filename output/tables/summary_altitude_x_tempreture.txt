@@ -1,0 +1,38 @@
+
+Call:
+lm(formula = log.soil.carbon ~ altitude * annual.mean.temperature, 
+    data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.79315 -0.16210  0.00671  0.14768  0.75059 
+
+Coefficients:
+                                   Estimate
+(Intercept)                       3.884e+00
+altitude                         -1.394e-04
+annual.mean.temperature          -3.706e-02
+altitude:annual.mean.temperature  7.516e-05
+                                 Std. Error
+(Intercept)                       7.129e-02
+altitude                          1.653e-04
+annual.mean.temperature           9.387e-03
+altitude:annual.mean.temperature  1.978e-05
+                                 t value Pr(>|t|)
+(Intercept)                       54.484  < 2e-16
+altitude                          -0.843 0.400117
+annual.mean.temperature           -3.948 0.000108
+altitude:annual.mean.temperature   3.800 0.000191
+                                    
+(Intercept)                      ***
+altitude                            
+annual.mean.temperature          ***
+altitude:annual.mean.temperature ***
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2617 on 204 degrees of freedom
+Multiple R-squared:  0.3617,	Adjusted R-squared:  0.3523 
+F-statistic: 38.53 on 3 and 204 DF,  p-value: < 2.2e-16
+

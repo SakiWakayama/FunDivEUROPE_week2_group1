@@ -1,0 +1,59 @@
+Linear mixed model fit by REML ['lmerMod']
+Formula: 
+log.soil.carbon ~ sand * annual.mean.precipitation + altitude +  
+    (1 | country)
+   Data: data
+
+REML criterion at convergence: 90.5
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.98762 -0.67446 -0.02802  0.64070  2.83214 
+
+Random effects:
+ Groups   Name        Variance  Std.Dev.
+ country  (Intercept) 0.0004525 0.02127 
+ Residual             0.0664387 0.25776 
+Number of obs: 208, groups:  country, 6
+
+Fixed effects:
+                                  Estimate
+(Intercept)                      4.249e+00
+sand2                           -9.441e-01
+sand3                           -5.775e-01
+annual.mean.precipitation       -7.624e-04
+altitude                         3.196e-04
+sand2:annual.mean.precipitation  1.198e-03
+sand3:annual.mean.precipitation  5.582e-04
+                                Std. Error
+(Intercept)                      2.648e-01
+sand2                            6.000e-01
+sand3                            9.207e-01
+annual.mean.precipitation        3.741e-04
+altitude                         6.424e-05
+sand2:annual.mean.precipitation  8.644e-04
+sand3:annual.mean.precipitation  1.526e-03
+                                t value
+(Intercept)                      16.047
+sand2                            -1.573
+sand3                            -0.627
+annual.mean.precipitation        -2.038
+altitude                          4.975
+sand2:annual.mean.precipitation   1.386
+sand3:annual.mean.precipitation   0.366
+
+Correlation of Fixed Effects:
+            (Intr) sand2  sand3  annl.. altitd
+sand2       -0.414                            
+sand3       -0.439  0.182                     
+annl.mn.prc -0.988  0.410  0.411              
+altitude    -0.638  0.252  0.424  0.542       
+snd2:nnl.m.  0.441 -0.996 -0.197 -0.441 -0.272
+snd3:nnl.m.  0.407 -0.168 -0.998 -0.384 -0.396
+            sn2:..
+sand2             
+sand3             
+annl.mn.prc       
+altitude          
+snd2:nnl.m.       
+snd3:nnl.m.  0.183

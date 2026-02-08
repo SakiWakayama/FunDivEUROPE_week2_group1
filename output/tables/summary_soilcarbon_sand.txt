@@ -1,0 +1,25 @@
+
+Call:
+lm(formula = log.soil.carbon ~ sand, data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.73407 -0.20205 -0.04042  0.16360  0.90720 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)  3.95083    0.02618 150.888  < 2e-16
+sand2       -0.13447    0.05819  -2.311   0.0218
+sand3       -0.32554    0.05164  -6.305 1.74e-09
+               
+(Intercept) ***
+sand2       *  
+sand3       ***
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2985 on 205 degrees of freedom
+Multiple R-squared:  0.1651,	Adjusted R-squared:  0.157 
+F-statistic: 20.28 on 2 and 205 DF,  p-value: 9.234e-09
+

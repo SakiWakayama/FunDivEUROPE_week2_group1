@@ -1,0 +1,38 @@
+
+Call:
+lm(formula = log.soil.carbon ~ altitude * annual.mean.precipitation, 
+    data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.78171 -0.17306 -0.00515  0.16458  0.69236 
+
+Coefficients:
+                                     Estimate
+(Intercept)                         2.931e+00
+altitude                            1.729e-03
+annual.mean.precipitation           1.159e-03
+altitude:annual.mean.precipitation -2.192e-06
+                                   Std. Error
+(Intercept)                         3.573e-01
+altitude                            4.832e-04
+annual.mean.precipitation           5.738e-04
+altitude:annual.mean.precipitation  8.141e-07
+                                   t value
+(Intercept)                          8.201
+altitude                             3.577
+annual.mean.precipitation            2.019
+altitude:annual.mean.precipitation  -2.692
+                                   Pr(>|t|)    
+(Intercept)                        2.63e-14 ***
+altitude                           0.000433 ***
+annual.mean.precipitation          0.044752 *  
+altitude:annual.mean.precipitation 0.007693 ** 
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.267 on 204 degrees of freedom
+Multiple R-squared:  0.3355,	Adjusted R-squared:  0.3257 
+F-statistic: 34.33 on 3 and 204 DF,  p-value: < 2.2e-16
+

@@ -1,0 +1,29 @@
+
+Call:
+lm(formula = log.soil.carbon ~ target.species.richness, data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.66507 -0.21738 -0.02966  0.18290  0.97621 
+
+Coefficients:
+                           Estimate Std. Error
+(Intercept)               3.8818226  0.0457860
+target.species.richness2 -0.0002144  0.0591872
+target.species.richness3 -0.0631079  0.0647511
+target.species.richness4 -0.0434293  0.0778212
+target.species.richness5 -0.1086143  0.1942534
+                         t value Pr(>|t|)    
+(Intercept)               84.782   <2e-16 ***
+target.species.richness2  -0.004    0.997    
+target.species.richness3  -0.975    0.331    
+target.species.richness4  -0.558    0.577    
+target.species.richness5  -0.559    0.577    
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.327 on 203 degrees of freedom
+Multiple R-squared:  0.008303,	Adjusted R-squared:  -0.01124 
+F-statistic: 0.4249 on 4 and 203 DF,  p-value: 0.7905
+

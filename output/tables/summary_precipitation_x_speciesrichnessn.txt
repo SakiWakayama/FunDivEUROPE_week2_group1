@@ -1,0 +1,73 @@
+
+Call:
+lm(formula = log.soil.carbon ~ annual.mean.precipitation * target.species.richness, 
+    data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.71008 -0.22796 -0.01333  0.17805  0.93408 
+
+Coefficients:
+                                                     Estimate
+(Intercept)                                         4.9752317
+annual.mean.precipitation                          -0.0017190
+target.species.richness2                           -0.5990854
+target.species.richness3                           -1.1515858
+target.species.richness4                           -1.0471981
+target.species.richness5                           -1.9046834
+annual.mean.precipitation:target.species.richness2  0.0009378
+annual.mean.precipitation:target.species.richness3  0.0017115
+annual.mean.precipitation:target.species.richness4  0.0015795
+annual.mean.precipitation:target.species.richness5  0.0028603
+                                                   Std. Error
+(Intercept)                                         0.3851254
+annual.mean.precipitation                           0.0006013
+target.species.richness2                            0.4961188
+target.species.richness3                            0.5584995
+target.species.richness4                            0.6545668
+target.species.richness5                            2.3105628
+annual.mean.precipitation:target.species.richness2  0.0007760
+annual.mean.precipitation:target.species.richness3  0.0008578
+annual.mean.precipitation:target.species.richness4  0.0010150
+annual.mean.precipitation:target.species.richness5  0.0037368
+                                                   t value
+(Intercept)                                         12.918
+annual.mean.precipitation                           -2.859
+target.species.richness2                            -1.208
+target.species.richness3                            -2.062
+target.species.richness4                            -1.600
+target.species.richness5                            -0.824
+annual.mean.precipitation:target.species.richness2   1.208
+annual.mean.precipitation:target.species.richness3   1.995
+annual.mean.precipitation:target.species.richness4   1.556
+annual.mean.precipitation:target.species.richness5   0.765
+                                                   Pr(>|t|)
+(Intercept)                                         < 2e-16
+annual.mean.precipitation                           0.00471
+target.species.richness2                            0.22866
+target.species.richness3                            0.04052
+target.species.richness4                            0.11123
+target.species.richness5                            0.41074
+annual.mean.precipitation:target.species.richness2  0.22830
+annual.mean.precipitation:target.species.richness3  0.04740
+annual.mean.precipitation:target.species.richness4  0.12127
+annual.mean.precipitation:target.species.richness5  0.44492
+                                                      
+(Intercept)                                        ***
+annual.mean.precipitation                          ** 
+target.species.richness2                              
+target.species.richness3                           *  
+target.species.richness4                              
+target.species.richness5                              
+annual.mean.precipitation:target.species.richness2    
+annual.mean.precipitation:target.species.richness3 *  
+annual.mean.precipitation:target.species.richness4    
+annual.mean.precipitation:target.species.richness5    
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.3224 on 198 degrees of freedom
+Multiple R-squared:  0.05975,	Adjusted R-squared:  0.01701 
+F-statistic: 1.398 on 9 and 198 DF,  p-value: 0.1911
+

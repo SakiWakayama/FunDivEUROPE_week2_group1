@@ -1,0 +1,46 @@
+
+Call:
+lm(formula = log.soil.carbon ~ sand * annual.mean.precipitation, 
+    data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.69972 -0.18599 -0.00584  0.17877  0.79097 
+
+Coefficients:
+                                  Estimate
+(Intercept)                      5.1818742
+sand2                           -1.7561640
+sand3                           -2.7051760
+annual.mean.precipitation       -0.0019153
+sand2:annual.mean.precipitation  0.0024713
+sand3:annual.mean.precipitation  0.0038644
+                                Std. Error
+(Intercept)                      0.2004037
+sand2                            0.6116250
+sand3                            0.8641267
+annual.mean.precipitation        0.0003095
+sand2:annual.mean.precipitation  0.0008761
+sand3:annual.mean.precipitation  0.0014579
+                                t value Pr(>|t|)
+(Intercept)                      25.857  < 2e-16
+sand2                            -2.871  0.00452
+sand3                            -3.131  0.00200
+annual.mean.precipitation        -6.188 3.34e-09
+sand2:annual.mean.precipitation   2.821  0.00527
+sand3:annual.mean.precipitation   2.651  0.00867
+                                   
+(Intercept)                     ***
+sand2                           ** 
+sand3                           ** 
+annual.mean.precipitation       ***
+sand2:annual.mean.precipitation ** 
+sand3:annual.mean.precipitation ** 
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2744 on 202 degrees of freedom
+Multiple R-squared:  0.3049,	Adjusted R-squared:  0.2877 
+F-statistic: 17.72 on 5 and 202 DF,  p-value: 1.506e-14
+

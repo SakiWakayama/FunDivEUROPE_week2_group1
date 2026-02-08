@@ -1,0 +1,38 @@
+Linear mixed model fit by REML ['lmerMod']
+Formula: 
+log.soil.carbon ~ sand + altitude + annual.mean.precipitation +  
+    (1 | country)
+   Data: data
+
+REML criterion at convergence: 68.8
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-3.01417 -0.70447 -0.00852  0.59237  2.71849 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ country  (Intercept) 0.003587 0.05989 
+ Residual             0.065644 0.25621 
+Number of obs: 208, groups:  country, 6
+
+Fixed effects:
+                            Estimate Std. Error
+(Intercept)                3.885e+00  2.624e-01
+sand2                     -1.054e-01  5.886e-02
+sand3                     -1.940e-01  7.607e-02
+altitude                   3.478e-04  7.768e-05
+annual.mean.precipitation -2.332e-04  3.802e-04
+                          t value
+(Intercept)                14.806
+sand2                      -1.790
+sand3                      -2.551
+altitude                    4.477
+annual.mean.precipitation  -0.613
+
+Correlation of Fixed Effects:
+            (Intr) sand2  sand3  altitd
+sand2        0.141                     
+sand3       -0.367  0.205              
+altitude    -0.396 -0.068  0.333       
+annl.mn.prc -0.976 -0.193  0.268  0.237

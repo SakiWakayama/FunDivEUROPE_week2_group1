@@ -1,0 +1,123 @@
+Analysis of Variance Table
+
+Model 1: log.soil.carbon ~ sand + altitude
+Model 2: log.soil.carbon ~ sand * altitude
+  Res.Df    RSS Df Sum of Sq      F Pr(>F)
+1    204 13.772                           
+2    202 13.746  2  0.026088 0.1917 0.8257
+Analysis of Variance Table
+
+Model 1: log.soil.carbon ~ sand + altitude
+Model 2: log.soil.carbon ~ sand + altitude + annual.mean.precipitation
+  Res.Df    RSS Df Sum of Sq      F  Pr(>F)  
+1    204 13.772                              
+2    203 13.521  1   0.25129 3.7727 0.05348 .
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+$emmeans
+ sand emmean     SE  df lower.CL upper.CL
+ 1      3.95 0.0262 205     3.90     4.00
+ 2      3.82 0.0520 205     3.71     3.92
+ 3      3.63 0.0445 205     3.54     3.71
+
+Confidence level used: 0.95 
+
+$contrasts
+ contrast      estimate     SE  df t.ratio
+ sand1 - sand2    0.134 0.0582 205   2.311
+ sand1 - sand3    0.326 0.0516 205   6.305
+ sand2 - sand3    0.191 0.0684 205   2.793
+ p.value
+  0.0565
+ <0.0001
+  0.0157
+
+P value adjustment: tukey method for comparing a family of 3 estimates 
+
+$emmeans
+ sand emmean     SE  df lower.CL upper.CL
+ 1      3.95 0.0262 205     3.90     4.00
+ 2      3.82 0.0520 205     3.71     3.92
+ 3      3.63 0.0445 205     3.54     3.71
+
+Confidence level used: 0.95 
+
+$contrasts
+ contrast      estimate     SE  df t.ratio
+ sand1 - sand2    0.134 0.0582 205   2.311
+ sand1 - sand3    0.326 0.0516 205   6.305
+ sand2 - sand3    0.191 0.0684 205   2.793
+ p.value
+  0.0565
+ <0.0001
+  0.0157
+
+P value adjustment: tukey method for comparing a family of 3 estimates 
+
+
+Call:
+lm(formula = log.soil.carbon ~ sand * target.species.richness, 
+    data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.73604 -0.19300 -0.04076  0.15221  0.90524 
+
+Coefficients: (1 not defined because of singularities)
+                                Estimate
+(Intercept)                     3.952791
+sand2                          -0.179965
+sand3                          -0.311379
+target.species.richness2        0.007854
+target.species.richness3       -0.020968
+target.species.richness4       -0.004080
+target.species.richness5       -0.092824
+sand2:target.species.richness2  0.001118
+sand3:target.species.richness2 -0.040620
+sand2:target.species.richness3  0.106281
+sand3:target.species.richness3 -0.064336
+sand2:target.species.richness4  0.072320
+sand3:target.species.richness4  0.067345
+sand2:target.species.richness5        NA
+sand3:target.species.richness5  0.181242
+                               Std. Error t value
+(Intercept)                      0.050833  77.760
+sand2                            0.119214  -1.510
+sand3                            0.125989  -2.471
+target.species.richness2         0.065386   0.120
+target.species.richness3         0.078498  -0.267
+target.species.richness4         0.101666  -0.040
+target.species.richness5         0.309206  -0.300
+sand2:target.species.richness2   0.165926   0.007
+sand3:target.species.richness2   0.157227  -0.258
+sand2:target.species.richness3   0.159819   0.665
+sand3:target.species.richness3   0.163116  -0.394
+sand2:target.species.richness4   0.201418   0.359
+sand3:target.species.richness4   0.181460   0.371
+sand2:target.species.richness5         NA      NA
+sand3:target.species.richness5   0.394221   0.460
+                               Pr(>|t|)    
+(Intercept)                      <2e-16 ***
+sand2                            0.1328    
+sand3                            0.0143 *  
+target.species.richness2         0.9045    
+target.species.richness3         0.7897    
+target.species.richness4         0.9680    
+target.species.richness5         0.7643    
+sand2:target.species.richness2   0.9946    
+sand3:target.species.richness2   0.7964    
+sand2:target.species.richness3   0.5068    
+sand3:target.species.richness3   0.6937    
+sand2:target.species.richness4   0.7199    
+sand3:target.species.richness4   0.7109    
+sand2:target.species.richness5       NA    
+sand3:target.species.richness5   0.6462    
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.305 on 194 degrees of freedom
+Multiple R-squared:  0.1754,	Adjusted R-squared:  0.1201 
+F-statistic: 3.174 on 13 and 194 DF,  p-value: 0.0002447
+
