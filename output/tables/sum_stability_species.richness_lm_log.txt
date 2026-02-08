@@ -1,0 +1,24 @@
+
+Call:
+lm(formula = log_stability ~ target.species.richness, data = data)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.74437 -0.14971  0.01123  0.15578  0.70028 
+
+Coefficients:
+                        Estimate Std. Error
+(Intercept)              1.57929    0.04664
+target.species.richness  0.06543    0.01843
+                        t value Pr(>|t|)    
+(Intercept)               33.86  < 2e-16 ***
+target.species.richness    3.55 0.000479 ***
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2699 on 204 degrees of freedom
+  (2 個の観測値が欠損のため削除されました)
+Multiple R-squared:  0.05817,	Adjusted R-squared:  0.05355 
+F-statistic:  12.6 on 1 and 204 DF,  p-value: 0.000479
+

@@ -1,0 +1,25 @@
+
+Call:
+lm(formula = stability.biomass.production ~ target.species.richness, 
+    data = data)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.5224 -1.0141 -0.1493  0.7190  5.7636 
+
+Coefficients:
+                        Estimate Std. Error
+(Intercept)               4.9635     0.2732
+target.species.richness   0.3882     0.1080
+                        t value Pr(>|t|)    
+(Intercept)              18.170  < 2e-16 ***
+target.species.richness   3.596 0.000405 ***
+---
+Signif. codes:  
+0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.581 on 204 degrees of freedom
+  (2 個の観測値が欠損のため削除されました)
+Multiple R-squared:  0.05962,	Adjusted R-squared:  0.05501 
+F-statistic: 12.93 on 1 and 204 DF,  p-value: 0.000405
+
