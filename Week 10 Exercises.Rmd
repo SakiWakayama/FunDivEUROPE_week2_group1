@@ -1,0 +1,49 @@
+---
+title: "Week 10- Resilience of tree growth"
+output: html_document
+date: "2026-02-08"
+---
+
+2.	Test the hypothesis that the resilience of tree growth (resilience.biomass.production) depends on species richness in Spanish plots. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+FunDivEurope<-read.csv("../Data/FunDivEUROPE.csv")
+library(nlme)
+library(emmeans)
+library(ggplot2)
+```
+
+```{r}
+#prepare data subset
+spanish_plots <- subset(jena_annual, country == "Spain")
+
+head(spanish_plots)
+```
+```{r}
+# Basic LM
+lm.resilience <- lm(resilience.biomass.production ~ target.species.richness, data = spanish_plots)
+summary(lm.resilience)
+
+```
+```{r}
+#check residuals
+plot(lm.resilience)       
+qqnorm(resid(lm.resilience))
+qqline(resid(lm.resilience))
+
+#homogenous
+gls.resilience <- gls(resilience.biomass.production ~ target.species.richness,
+                      data = spanish_plots,
+                      weights = varIdent(form = ~1 | target.species.richness))
+anova(gls.resilience)
+```
+
+
+```{r}
+emmeans.resilience <- emmeans(gls.resilience, pairwise ~ target.species.richness)
+emmeans.resilience
+
+```
+
