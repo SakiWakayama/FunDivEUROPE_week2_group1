@@ -16,10 +16,13 @@ library(see)
 fundiv <- read.csv( "../Data/FunDivEUROPE.csv")
 ```
 
-## Preparing the data
-### Selecting data that I need
+# Group 2 members
+-   Jianyou Lee
+-   Saki Wakayama
+-   Henrietta Born
+-   Samuel Bahlinger
 
-```{r}
+```{r, include=FALSE}
 str(fundiv)
 ```
 
@@ -27,9 +30,42 @@ str(fundiv)
 Test the hypothesis that the resilience of tree growth (resilience.biomass.production) depends on species richness in Spanish plots. 
 
 
-```{r }
-
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+FunDivEurope<-read.csv("../Data/FunDivEUROPE.csv")
+library(nlme)
+library(emmeans)
+library(ggplot2)
 ```
+
+```{r}
+#prepare data subset
+spanish_plots <- subset(FunDivEurope, country == "Spain")
+
+head(spanish_plots)
+```
+```{r}
+# Basic LM
+lm.resilience <- lm(resilience.biomass.production ~ target.species.richness, data = spanish_plots)
+summary(lm.resilience)
+```
+Interpretation: Tree growth resilience increased significantly with increasing species richness in Spanish plots (linear model: p = 0.042).
+
+
+```{r}
+#check residuals
+plot(lm.resilience)       
+qqnorm(resid(lm.resilience))
+qqline(resid(lm.resilience))
+
+#homogenous
+gls.resilience <- gls(resilience.biomass.production ~ target.species.richness,
+                      data = spanish_plots,
+                      weights = varIdent(form = ~1 | target.species.richness))
+anova(gls.resilience)
+```
+
+When accounting for heteroscedasticity using a generalized least squares model, the effect of species richness on resilience was no longer statistically significant (p = 0.11).
 
 
 ## Question 2
