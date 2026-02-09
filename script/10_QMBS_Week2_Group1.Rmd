@@ -1,0 +1,869 @@
+---
+title: "Week 2 Exercise"
+output: html_document
+date: "2026-02-08"
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# packages 
+library(tidyverse)
+library(emmeans)
+library(effects)
+library(car)
+library(see)
+# read data
+fundiv <- read.csv( "../Data/FunDivEUROPE.csv")
+```
+
+## Preparing the data
+### Selecting data that I need
+
+```{r}
+str(fundiv)
+```
+
+## Question 1 
+Test the hypothesis that the resilience of tree growth (resilience.biomass.production) depends on species richness in Spanish plots. 
+
+
+```{r }
+
+```
+
+
+## Question 2
+Test the hypothesis that the stability of tree growth depends on species richness (stability.biomass.production).  
+
+#Test the hypothesis that the stability of tree growth
+#depends on species richness (stability.biomass.production).
+
+```{r, include=FALSE}
+library(tidyverse) 
+
+
+data <- read.csv("../data/FunDivEUROPE.csv")
+
+
+head(data)
+str(data)
+summary(data)
+```
+
+```{r}
+# check the data tyoe of each predictor
+
+for(var in names(data)){
+  cat("Variable:", var, "\n")
+  cat("  Class:", class(data[[var]]), "\n")
+  cat("  Unique values:", length(unique(data[[var]])), "\n")
+  cat("  First 5 values:", head(data[[var]],5), "\n\n")
+}
+```
+```{r}
+#simple linear regression and check residual plot
+m1 <- lm(stability.biomass.production ~ target.species.richness, data = data)
+
+
+summary(m1)
+sum_stability_species.richness_lm <- summary(m1)
+
+```
+According to the model summary, the simple linear regression shows a significant positive 
+relationship between target species richness and the stability of biomass production. 
+However, the explanatory power of the model is low (R² = 0.0596, adjusted R² = 0.055), 
+indicating that species richness alone explains only a small proportion of the variation in stability. 
+This suggests that additional factors, such as country-level effects and interactions 
+with other environmental variables, are likely to play an important role.
+
+```{r}
+par(mfrow = c(2,2))
+plot(m1)
+par(mfrow = c(1,1))
+```
+```{r}
+#log transformation
+data$log_stability <- log(data$stability.biomass.production)
+
+m_log <- lm(log_stability ~ target.species.richness, data = data)
+par(mfrow = c(2,2))
+plot(m_log)
+summary(m_log)
+sum_stability_species.richness_lm_log <- summary(m_log)
+
+
+
+length(unique(data$target.species.richness))
+
+library(effects)
+eff_precip.lm <- effect("target.species.richness", m_log, partial.residuals = TRUE)
+plot(eff_precip.lm,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+```
+Log-transformed linear regression also showed a significant positive effect of 
+target species richness on stability of biomass production (β = 0.065, p < 0.001). 
+Model fit (R² ≈ 0.06) was nearly identical to the untransformed model, 
+indicating that the inference is robust to log transformation.
+
+target.species.richness => factor and ANOVA
+```{r}
+data$rich_f <- factor(data$target.species.richness)
+data$log.soil.carbon <- log(data$soil.carbon)
+m_aov <- aov(log_stability ~ rich_f, data = data)
+
+summary(m_aov)
+sum_stability_species.richness_aov <- summary(m_aov)
+
+anova_sand <- lm(log.soil.carbon ~ sand, data = data)
+
+emmeans(m_aov, pairwise ~ rich_f, adjust = "Tukey")
+
+emm_stability_species_richness <- emmeans(anova_sand, pairwise ~ sand, adjust = "Tukey")
+
+```
+One-way ANOVA on log-transformed stability showed significant differences among species richness levels 
+(F(4, 201) = 4.51, p = 0.0016). 
+Post-hoc comparisons indicated that stability at intermediate richness levels (three and four species) was significantly higher 
+than at the lowest richness level, while differences among higher richness levels were not significant.
+
+```{r}
+par(mfrow = c(2,2))
+plot(m_aov)
+par(mfrow = c(1,1))
+
+library(ggplot2)
+
+eff_precip.anova <- effect("rich_f", m_aov, partial.residuals = TRUE)
+plot(eff_precip.anova,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+```
+
+summary about single-linear regression and one-way anova
+Residual diagnostics indicated a substantial improvement
+when species richness was treated as a categorical variable in the ANOVA model. 
+Using this ANOVA as a baseline model, significant differences in stability were 
+detected primarily between intermediate richness levels (three and four species), 
+whereas no significant differences were observed at higher richness levels. 
+Overall, species richness appears to influence the stability of tree growth; 
+however, the relationship is not strictly linear, and stability may increase mainly at intermediate levels of diversity.
+
+Nevertheless, large variation in stability of biomass production was observed 
+within each species richness level in both the categorical and linear models. 
+This suggests that additional factors beyond species richness are likely to be important, 
+and that mixed-effects models incorporating other environmental variables and interaction terms should be considered.
+
+effect of country as random effect
+
+```{r}
+library(lme4)
+
+m1.lmer <- lmer(
+  log_stability ~ target.species.richness +
+    (1 | country),
+  data = data
+)
+par(mfrow = c(2,2))
+plot(m1.lmer)
+par(mfrow = c(1,1))
+
+summary(m1.lmer)
+sum_stability_species.richness_country.effect_lmer <- summary(m1.lmer)
+
+```
+
+A linear mixed-effects model including country as a random effect confirmed a significant positive effect 
+of target species richness on the stability of biomass production, 
+indicating that the diversity effect is robust across countries.
+```{r}
+eff_precip_mixlm <- effect("target.species.richness", m1.lmer, partial.residuals = TRUE)
+plot(eff_precip_mixlm,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+m1.lmer.anovamix <- lmer(
+  log_stability ~ rich_f +
+    (1 | country),
+  data = data
+)
+
+eff_precip.anovamix <- effect("rich_f", m1.lmer.anovamix, partial.residuals = TRUE)
+plot(eff_precip.anovamix,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+```
+
+## Question 3 
+Which country is most suitable for tree growth (tree.biomass.production)? 
+
+The most simple answer to compare, is a box and whisker plot of tree growth of different country
+```{r}
+# Select data of country, tree.biomass.production
+best_country <- fundiv[,c("country", "tree.biomass.production")]
+# make country as factors 
+best_country$country <- as.factor(best_country$country)
+
+# boxplot
+ggplot(best_country, aes(x = country, y = tree.biomass.production)) +
+  geom_boxplot() + 
+  theme_bw() + 
+  labs(x = "Countries", 
+       y = "Tree Growth",
+       title = "Tree Growth in Different Countries")
+```
+Seems like Germany and Romania has higher tree growth
+```{r}
+# Select data of Germany and Romania for comparison 
+tree.biomass.germany <- best_country %>% filter(country == "Germany")
+tree.biomass.romania <- best_country %>% filter(country == "Romania")
+summary(tree.biomass.germany)
+summary(tree.biomass.romania)
+```
+So from boxplot and just from mean and median, we can see Romania, at first glance, has the highest tree growth. 
+
+```{r}
+# If I just want to compare if these two countries are significantly different
+germany.romania <- rbind(tree.biomass.germany, tree.biomass.romania)
+# check if I combined them correctly
+nrow(germany.romania) == nrow(tree.biomass.germany) + nrow(tree.biomass.romania)
+# compare variance just between germany and romania
+anova(lm(tree.biomass.production ~ country, data = germany.romania))
+```
+Seems like there's no significant difference between Germany and Romania in terms of tree growth. 
+
+```{r}
+# More analysis 
+# I am not sure if the other biomass.production is needed
+#best.country <- fundiv[,c("country", 
+#                          "tree.biomass.production", 
+#                          "recovery.biomass.production", 
+#                          "resilience.biomass.production", 
+#                          "resistance.biomass.production", 
+#                          "stability.biomass.production")]
+anova.best.country <- lm(tree.biomass.production ~ country , data = best_country) 
+par(mfrow = c(2, 2)) 
+plot(anova.best.country) 
+par(mfrow = c(1, 1))
+```
+Scale-Location plot shows the residuals are not entirely homoscedastic. 
+Doesn't matter because I only want to know which country has the highest tree growth, including and regardless other factors. 
+
+```{r}
+anova(anova.best.country)
+emmeans(anova.best.country, pairwise~country, adjust = "Tukey") 
+```
+From the ANOVA and Post-hoc test (Tukey), we can see that Germany and Romania has significant difference compared to other countries in terms of tree growth. (\(p < 0.001\))). Except, in between Germany and Romania, there's no significant difference (\(p = 0.57\)). 
+
+## Question 4
+Does the relationship between stability and tree species richness in Romanian forests differ among forests with even vs. uneven age distribution? 
+
+First, to select the required data and set the categorical preditors as.factor(). Followed by diagnostic plots. 
+```{r}
+stability.age <- fundiv[fundiv$country == "Romania",
+                        c("stability.biomass.production", 
+                           "target.species.richness", 
+                           "age.distribution")] 
+stability.age$target.species.richness <- as.factor(stability.age$target.species.richness)
+stability.age$age.distribution <- as.factor(stability.age$age.distribution)
+anova.stab.age <- lm(stability.biomass.production ~ target.species.richness * age.distribution, data = stability.age)
+par(mfrow = c(2, 2))
+plot(anova.stab.age)
+par(mfrow = c(1, 1))
+
+```
+Scale-Location plot shows the residual may be not homogeneous
+
+```{r}
+#log transform 
+stability.age$log.stability <- log(stability.age$stability.biomass.production +1)
+anova.stab.age <- lm(log.stability ~ target.species.richness * age.distribution, data = stability.age)
+par(mfrow = c(2, 2))
+plot(anova.stab.age)
+par(mfrow = c(1, 1))
+```
+
+```{r}
+summary(anova.stab.age)
+anova(anova.stab.age)
+```
+Only accounting Romania has too limited data, which is unable to show significance towards the relationship between stability and species richness (\(F_{3, 21} = 3.11\), \(p = 0.05\)).
+
+```{r}
+plot(allEffects(anova.stab.age), lines=list(multiline=TRUE))
+```
+## Question 5
+Test the hypothesis that soil carbon stock (soil.carbon) depends on species richness, altitude, sand cover, annual mean temperature, and precipitation. 
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) 
+
+
+data <- read.csv("../data/FunDivEUROPE.csv")
+
+
+head(data)
+str(data)
+summary(data)
+```
+
+# check the data tyoe of each predictor
+```{r}
+for(var in names(data)){
+  cat("Variable:", var, "\n")
+  cat("  Class:", class(data[[var]]), "\n")
+  cat("  Unique values:", length(unique(data[[var]])), "\n")
+  cat("  First 5 values:", head(data[[var]],5), "\n\n")
+}
+```
+
+with linear regression and check
+```{r}
+#transformation to factor of target species richness
+data$target.species.richness <- as.factor(data$target.species.richness)
+#transformation to factor of sand
+data$sand <- as.factor(data$sand)
+
+#try single linear regression and check statistic 
+lm.soilcarbon.tsr <- lm(soil.carbon ~ target.species.richness, data = data)
+lm.soilcarbon.sd  <- lm(soil.carbon ~ sand, data = data)
+lm.soilcarbon.altitude <- lm(soil.carbon ~ altitude, data = data)
+lm.soilcarbon.temp <- lm(soil.carbon ~ annual.mean.temperature, data = data)
+lm.soilcarbon.preci <- lm(soil.carbon ~ annual.mean.precipitation, data = data)
+```
+
+```{r}
+#check model of target species richness
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.tsr)
+par(mfrow = c(1,1))
+```
+```{r}
+# check sd
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.sd)
+par(mfrow = c(1,1))
+
+#check altitude
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.altitude) 
+par(mfrow = c(1,1))
+
+#check temp
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.temp)
+par(mfrow = c(1,1))
+
+#check prici
+par(mfrow = c(2,2))
+plot(lm.soilcarbon.preci)
+par(mfrow = c(1,1))
+```
+
+```{r}
+#log transformation and try  again lm
+min(data$soil.carbon, na.rm = TRUE)
+data$log.soil.carbon <- log(data$soil.carbon)
+
+lm.sc.log.tsr <- lm(log.soil.carbon ~ target.species.richness, data = data)
+lm.sc.log.sd  <- lm(log.soil.carbon ~ sand, data = data)
+lm.sc.log.altitude <- lm(log.soil.carbon ~ altitude, data = data)
+lm.sc.log.temp <- lm(log.soil.carbon ~ annual.mean.temperature, data = data)
+lm.sc.log.preci <- lm(log.soil.carbon ~ annual.mean.precipitation, data = data)
+```
+
+```{r}
+#check model againl with log
+
+#check model of target species richness
+par(mfrow = c(2,2))
+plot(lm.sc.log.tsr)
+par(mfrow = c(1,1))
+
+
+# check sd
+par(mfrow = c(2,2))
+plot(lm.sc.log.sd)
+par(mfrow = c(1,1))
+
+#check altitude
+par(mfrow = c(2,2))
+plot(lm.sc.log.altitude) 
+par(mfrow = c(1,1))
+
+#check temp
+par(mfrow = c(2,2))
+plot(lm.sc.log.temp)
+par(mfrow = c(1,1))
+
+#check prici
+par(mfrow = c(2,2))
+plot(lm.sc.log.preci)
+par(mfrow = c(1,1))
+```
+
+summary
+```{r}
+summary(lm.sc.log.tsr)
+
+summary(lm.sc.log.tsr)
+
+```
+
+The target species richness did not have a significant effect on soil carbon stock (F = 0.425, p = 0.79). The differences in predicted values among the richness levels were also not statistically significant. The overall explanatory power of the model was very low (R² = 0.008), suggesting that most of the variation in soil carbon is dependent on other factors.
+
+
+```{r}
+summary(lm.sc.log.sd)
+
+
+summary(lm.sc.log.sd)
+
+```
+
+The type of sand had a significant effect on soil carbon stock (F = 20.28, p < 0.001). Both sand2 and sand3 had significantly lower soil carbon compared to the reference sand type (sand1). The overall explanatory power of the model was 16%, indicating that sand type accounts for a portion of the variation in soil carbon.
+
+```{r}
+summary(lm.sc.log.altitude)
+
+
+summary(lm.sc.log.tsr)
+
+```
+
+Altitude had a significant positive effect on soil carbon stock (F = 92.21, p < 0.001), with soil carbon increasing as altitude rises. The overall explanatory power of the model was approximately 31%, indicating that altitude accounts for a portion of the variation in soil carbon.
+
+
+```{r}
+summary(lm.sc.log.temp)
+
+
+summary(lm.sc.log.tsr)
+
+```
+
+Annual mean temperature did not have a significant effect on soil carbon stock on its own (F = 1.176, p = 0.28). The overall explanatory power of the model was minimal (R² ≈ 0.006), indicating that variation in soil carbon cannot be explained by temperature alone.
+```{r}
+summary(lm.sc.log.preci)
+
+
+summary(lm.sc.log.tsr)
+
+```
+
+Annual mean precipitation had a small but significant negative effect on soil carbon stock (β = -0.00076, p = 0.011). The overall explanatory power of the model was low (R² ≈ 0.03), indicating that precipitation alone cannot account for most of the variation in soil carbon.
+
+Based on the results so far, species richness, temperature, and precipitation cannot be considered as primary explanatory variables for soil carbon on their own. In contrast, altitude and sand type appear to have the potential to act as major single factors influencing soil carbon. Therefore, a base model using altitude and sand as fixed effects should first be constructed, and the distribution of the residuals should be re-examined. After that, models incorporating interaction effects and random effects can be created, visualized, and tested separately.
+
+
+
+ sand, atitude model
+```{r}
+lm.sd.at <- lm(log.soil.carbon ~ sand + altitude, data = data)
+
+par(mfrow = c(2, 2))
+plot(lm.sd.at)
+summary(lm.sd.at)
+
+
+
+lm.sd.at.int <- lm(log.soil.carbon ~ sand * altitude, data = data)
+anova(lm.sd.at, lm.sd.at.int)
+```
+
+No interaction was detected between sand and altitude. Adding the sand × altitude interaction to the model did not significantly improve it (F = 0.192, p = 0.826). Therefore, the effects of sand and altitude on soil carbon stock can be adequately explained by their main effects alone.
+
+about precipitation
+```{r}
+lm.base <- lm(log.soil.carbon ~ sand + altitude, data = data)
+lm.p <- lm(log.soil.carbon ~ sand + altitude + annual.mean.precipitation, data = data)
+anova(lm.base, lm.p)
+
+anova(lm.base, lm.p)
+
+```
+
+The effect of annual mean precipitation on soil carbon is only marginally significant, but considering potential influences of random effects, it will be retained as a fixed effect.
+
+Step 1: Visualization of the Base Model with Fixed Effects
+
+The fixed effects to be included are:
+  
+Sand (categorical variable)
+
+Altitude (continuous variable)
+
+Annual mean precipitation (continuous variable)
+
+This base model will allow us to visualize the relationships of these key predictors with soil carbon before adding interaction or random effects.
+
+
+```{r}
+library(effects)
+
+
+m_base <- lm(log.soil.carbon ~ sand + altitude + annual.mean.precipitation, data = data)
+
+
+eff_sand <- effect("sand", m_base, partial.residuals = TRUE)
+
+
+plot(eff_sand,
+     main = "",
+     ylab = "log(Soil Carbon)",
+     xlab = "Sand Type")
+
+
+plot(eff_sand,
+     main = "",
+     ylab = "Soil Carbon",
+     xlab = "Sand Type",
+     transformation = list(link = log, inverse = exp))
+
+
+
+ggplot(data, aes(x = altitude, y = log.soil.carbon)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "blue") +
+  ylab("log(Soil Carbon)") +
+  xlab("Altitude (m)") +
+  theme_classic()
+
+
+
+ggplot(data, aes(x = annual.mean.precipitation, y = log.soil.carbon)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "darkgreen") +
+  ylab("log(Soil Carbon)") +
+  xlab("Annual Mean Precipitation (mm)") +
+  theme_classic()
+```
+
+
+use effect
+```{r}
+eff_alt <- effect("altitude", m_base, partial.residuals = TRUE)
+plot(eff_alt,
+     main = "",
+     ylab = "log(Soil Carbon)",
+     xlab = "Altitude")
+
+
+
+eff_precip <- effect("annual.mean.precipitation", m_base, partial.residuals = TRUE)
+plot(eff_precip,
+     main = "",
+     ylab = "log(Soil Carbon)",
+     xlab = "Annual Precipitation")
+
+
+eff_all <- allEffects(m_base, partial.residuals = TRUE)
+plot(eff_all)
+
+
+library(emmeans)
+anova_sand <- lm(log.soil.carbon ~ sand, data = data)
+emmeans(anova_sand, pairwise ~ sand, adjust = "Tukey")
+
+emm_res <- emmeans(anova_sand, pairwise ~ sand, adjust = "Tukey")
+
+```
+
+Based on the model-adjusted estimated means (emmeans), sand type had a clear effect on soil carbon stock. Soil carbon in sand3 was significantly lower than in sand1 and sand2 (sand1–sand3: p < 0.0001, sand2–sand3: p = 0.016), while the difference between sand1 and sand2 was marginally significant (p = 0.056). Overall, this suggests that sand type has a notable influence on soil carbon.
+
+So far, the factors that had significant effects on soil carbon as single predictors were sand, altitude, and annual mean precipitation. Other factors did not show significant effects on soil carbon on their own.
+
+For interaction effects, the following combinations will be examined:
+  
+sand × species richness
+
+sand × precipitation
+
+altitude × temperature
+
+altitude × precipitation
+
+precipitation × target species richness
+
+
+
+intaraction between sand and target.species.richness
+```{r}
+m_sand_rich <- lm(log.soil.carbon ~ sand*target.species.richness, data = data)
+summary(m_sand_rich)
+sum_sand_rich <- summary(m_sand_rich)
+
+```
+There was no interaction between sand and target species richness.
+
+
+
+sand and annual.mean.precipitation
+```{r}
+m_sand_precip <- lm(log.soil.carbon ~ sand*annual.mean.precipitation, data = data)
+summary(m_sand_precip)
+sum_sand_precip <- summary(m_sand_precip)
+
+```
+
+The effect of precipitation reduces the differences in soil carbon among the sand types.
+
+altitude and temperature
+```{r}
+m_alt_temp <- lm(log.soil.carbon ~ altitude*annual.mean.temperature, data = data)
+summary(m_alt_temp)
+sum_alt_temp <- summary(m_alt_temp)
+
+```
+Altitude mitigates the decrease in soil carbon caused by higher temperatures.
+
+altitude and annual.mean,precipitation
+```{r}
+m_alt_precip <- lm(log.soil.carbon ~ altitude*annual.mean.precipitation, data = data)
+summary(m_alt_precip)
+
+sum_alt_precip <- summary(m_alt_precip)
+
+```
+
+Altitude has a negative effect on the impact of precipitation on soil carbon.
+
+```{r}
+m_precip_rich <- lm(log.soil.carbon ~ annual.mean.precipitation*target.species.richness, data = data)
+summary(m_precip_rich)
+
+sum_precip_rich <- summary(m_precip_rich)
+
+```
+There is no interaction between precipitation and target species richness.
+
+In summary, the observed interactions among factors are as follows:
+  
+The effect of precipitation reduces the differences in soil carbon among sand types.
+
+Altitude mitigates the decrease in soil carbon caused by higher temperatures.
+
+Altitude has a negative effect on the impact of precipitation on soil carbon.
+
+```{r}
+library(ggplot2)
+
+
+data$pred <- predict(m_sand_precip, newdata = data)
+
+
+ggplot(data, aes(x = annual.mean.precipitation, y = log.soil.carbon, color = sand)) +
+  geom_point(alpha = 0.5) +          
+  geom_line(aes(y = pred), size = 1) + 
+  labs(x = "Annual Mean Precipitation", y = "Log Soil Carbon", color = "Sand Type") +
+  theme_minimal()
+```
+
+The annual mean precipitation shows an interesting effect in its interaction with sand type on soil carbon. 
+Sand type had a significant impact on soil carbon (sand2: -1.76, p = 0.0045; sand3: -2.71, p = 0.0020). Additionally, precipitation reduced soil carbon in the reference sand, 
+but this negative effect was mitigated in sand2 and sand3 due to the interaction with sand type. The overall model was significant (F = 17.72, p < 0.001) and explained approximately 30% of the variation in soil carbon (R² = 0.305).
+However, soil carbon may also be influenced by country, litter layer, root biomass, and microbial biomass. 
+Therefore, these factors should be incorporated as random effect(country) or interaction terms, and the changes in fixed effects, as well as factors that were not significant on their own, should be re-evaluated.
+
+
+random effect; country
+```{r}
+library(lme4)
+
+m_mixed_country <- lmer(
+  log.soil.carbon ~ sand + altitude + annual.mean.precipitation +
+    (1 | country),
+  data = data
+)
+```
+sand/ randome effect country plot and result
+```{r}
+library(emmeans)
+
+emm_sand <- emmeans(m_mixed_country, ~ sand)
+
+plot(emm_sand)
+
+eff_alt <- effect("altitude", m_mixed_country)
+plot(eff_alt,
+     xlab = "Altitude",
+     ylab = "log(Soil Carbon)")
+
+eff_precip <- effect("annual.mean.precipitation", m_mixed_country)
+plot(eff_precip,
+     xlab = "Annual Mean Precipitation",
+     ylab = "log(Soil Carbon)")
+
+newdat <- expand.grid(
+  sand = levels(data$sand),
+  altitude = seq(min(data$altitude), max(data$altitude), length = 100),
+  annual.mean.precipitation = mean(data$annual.mean.precipitation),
+  country = NA   # ← ここが重要
+)
+
+newdat$pred <- predict(m_mixed_country, newdata = newdat, re.form = NA)
+
+newdat <- expand.grid(
+  sand = levels(data$sand),
+  altitude = seq(min(data$altitude), max(data$altitude), length = 100),
+  annual.mean.precipitation = mean(data$annual.mean.precipitation),
+  country = NA
+)
+
+newdat$pred <- predict(m_mixed_country, newdata = newdat, re.form = NA)
+
+ggplot(data, aes(x = altitude, y = log.soil.carbon, color = sand)) +
+  geom_point(alpha = 0.3) +
+  geom_line(data = newdat,
+            aes(x = altitude, y = pred, color = sand),
+            size = 1) +
+  labs(y = "log(Soil Carbon)",
+       x = "Altitude") +
+  theme_classic()
+
+summary(m_mixed_country)
+sum_mixed_country <- summary(m_mixed_country)
+
+```
+After accounting for between-country variability, sand type and altitude remained significant predictors of soil carbon, 
+whereas the effect of annual mean precipitation was no longer significant.
+
+intaraction of sand and precipitation with counrty effect
+```{r}
+m_mixed_country_sd.pre <- lmer(log.soil.carbon ~ sand * annual.mean.precipitation + altitude +
+       (1 | country), data = data)
+
+newdat <- expand.grid(
+  sand = levels(data$sand),
+  annual.mean.precipitation =
+    seq(min(data$annual.mean.precipitation),
+        max(data$annual.mean.precipitation),
+        length = 100),
+  altitude = mean(data$altitude),
+  country = NA
+)
+
+newdat$pred <- predict(
+  m_mixed_country_sd.pre,
+  newdata = newdat,
+  re.form = NA
+)
+```
+
+```{r}
+ggplot(data,
+       aes(x = annual.mean.precipitation,
+           y = log.soil.carbon,
+           color = sand)) +
+  geom_point(alpha = 0.3) +
+  geom_line(data = newdat,
+            aes(y = pred),
+            size = 1) +
+  labs(
+    x = "Annual Mean Precipitation",
+    y = "Predicted log(Soil Carbon)",
+    color = "Sand type"
+  ) +
+  theme_classic()
+```  
+
+```{r}
+summary(m_mixed_country_sd.pre)
+sum_mixed_country_sd.pre <- summary(m_mixed_country_sd.pre)
+
+```
+
+The effect of precipitation on soil carbon tended to differ among sand types, 
+but this interaction became weaker after accounting for between-country variability.
+
+## Question 6
+Test the hypothesis that microbial biomass depends on species richness, altitude, sand cover, annual mean temperature and precipitation. 
+
+I propose to use multi linear regression model, with several confounding variables 
+```{r microbe}
+microbe<- fundiv[,c("target.species.richness", 
+                 "altitude", 
+                 "sand", 
+                 "annual.mean.temperature", 
+                 "annual.mean.precipitation", 
+                 # confounding variables 
+                 "prop.conifers",  
+                 "soil.CN.ratio",
+                 "litter.decomposition", 
+                 "wood.decomposition" , 
+                 # random variable 
+                 "species.composition",
+                 # The responding variable 
+                 "microbial.biomass"
+                 )]
+str(microbe)
+microbe$sand <- as.factor(microbe$sand)
+microbe$species.composition <- as.factor(microbe$species.composition)
+microbe$target.species.richness <- as.factor(microbe$target.species.richness)
+```
+
+```{r}
+biomass.microbe <- lm(microbial.biomass ~ 
+                          target.species.richness +
+                          altitude + 
+                          sand + 
+                          annual.mean.temperature + 
+                          annual.mean.precipitation + 
+                          prop.conifers + 
+                          soil.CN.ratio + 
+                          litter.decomposition + 
+                          wood.decomposition, 
+                        data = microbe
+                          )
+# diagnostic plots
+par(mfrow = c(2, 2))
+plot(biomass.microbe)
+par(mfrow = c(1, 1))
+# vif
+vif(biomass.microbe) 
+
+```
+
+```{r}
+summary(biomass.microbe)
+anova(biomass.microbe)
+```
+
+The model represents approximately 59% of the variance (\(R^2 = 0.59\); adjusted \(R^2 = 0.56\)). 
+
+The microbial biomass were found to be significantly dependent to altitude (estimate = 0.64, \(t = 5.21), \(p < 0.001\)), sand (\(F_{2, 186} = 45.18\), \(p < 0.001\)), litter decomposition (estimate = 558.13, \(t = 5.88), \(p < 0.001\)) and soil CN ratio (estimate = -33.91, \(t = -4.00), \(p < 0.001\)). 
+
+The ANOVA table also shows moderate significance of annual mean precipitation (\(F_{1, 186} = 8.43\), \(p < 0.005\)) and conifer proportions (\(F_{1, 186} = 13.91\), \(p < 0.005\)). Species richness however, only shows very slight significance towards microbial biomass (\(F_{4, 186} = 3.15\), \(p < 0.05\))
+
+Following are visual representation for the two significantly dependent factors in question.  
+
+```{r}
+
+ggplot(data = microbe, aes(x = altitude, y = microbial.biomass)) + 
+  geom_smooth(method = "lm") + 
+  geom_point() +
+  labs(x = "Altitude", 
+       y = "Microbial Biomass", 
+       title = "Microbial Biomass Dependence on Altitude")
+
+
+ggplot(data = microbe, aes(x = sand, y = microbial.biomass)) + 
+  geom_boxplot() +
+  labs(x = "Sand", 
+       y = "Microbial Biomass", 
+       title = "Microbial Biomass Dependence on Sand")
+
+```
+
+## Final question 
+What are your random effects and how did you incorporate them? 
+
+I have tried using country as random intercept (I deleted the output afterwards), which did not improve much of my model. I also tried using species composition, but the number is too small. A suggestion that I think can be done, but I did not do, is to manually categorise conifer proportion, into meaningful groups, or forest type like "conifer", "semi-conifer", "non-conifer" then, use it as random effects, with interaction with species richness. 
+
+
+
