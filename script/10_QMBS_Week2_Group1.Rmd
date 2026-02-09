@@ -703,7 +703,7 @@ newdat <- expand.grid(
   sand = levels(data$sand),
   altitude = seq(min(data$altitude), max(data$altitude), length = 100),
   annual.mean.precipitation = mean(data$annual.mean.precipitation),
-  country = NA   # ← ここが重要
+  country = NA
 )
 
 newdat$pred <- predict(m_mixed_country, newdata = newdat, re.form = NA)
@@ -864,6 +864,7 @@ ggplot(data = microbe, aes(x = sand, y = microbial.biomass)) +
 What are your random effects and how did you incorporate them? 
 
 I have tried using country as random intercept (I deleted the output afterwards), which did not improve much of my model. I also tried using species composition, but the number is too small. A suggestion that I think can be done, but I did not do, is to manually categorise conifer proportion, into meaningful groups, or forest type like "conifer", "semi-conifer", "non-conifer" then, use it as random effects, with interaction with species richness. 
+
 
 
 
