@@ -25,8 +25,10 @@ head(spanish_plots)
 # Basic LM
 lm.resilience <- lm(resilience.biomass.production ~ target.species.richness, data = spanish_plots)
 summary(lm.resilience)
-
 ```
+Interpretation: Tree growth resilience increased significantly with increasing species richness in Spanish plots (linear model: p = 0.042).
+
+
 ```{r}
 #check residuals
 plot(lm.resilience)       
@@ -40,10 +42,6 @@ gls.resilience <- gls(resilience.biomass.production ~ target.species.richness,
 anova(gls.resilience)
 ```
 
+When accounting for heteroscedasticity using a generalized least squares model, the effect of species richness on resilience was no longer statistically significant (p = 0.11).
 
-```{r}
-emmeans.resilience <- emmeans(gls.resilience, pairwise ~ target.species.richness)
-emmeans.resilience
-
-```
 
