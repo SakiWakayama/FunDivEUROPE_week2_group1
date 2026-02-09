@@ -1,0 +1,171 @@
+#Test the hypothesis that the stability of tree growth
+#depends on species richness (stability.biomass.production).
+
+library(tidyverse) 
+
+
+data <- read.csv("../data/FunDivEUROPE.csv")
+
+
+head(data)
+str(data)
+summary(data)
+
+
+# check the data tyoe of each predictor
+
+for(var in names(data)){
+  cat("Variable:", var, "\n")
+  cat("  Class:", class(data[[var]]), "\n")
+  cat("  Unique values:", length(unique(data[[var]])), "\n")
+  cat("  First 5 values:", head(data[[var]],5), "\n\n")
+}
+
+#simple linear regression and check residual plot
+m1 <- lm(stability.biomass.production ~ target.species.richness, data = data)
+
+
+summary(m1)
+sum_stability_species.richness_lm <- summary(m1)
+
+capture.output(
+  print(sum_stability_species.richness_lm),
+  file = "output/tables/sum_stability_species.richness_lm.txt"
+)
+#According to the model summary, the simple linear regression shows a significant positive 
+#relationship between target species richness and the stability of biomass production. 
+#However, the explanatory power of the model is low (R² = 0.0596, adjusted R² = 0.055), 
+#indicating that species richness alone explains only a small proportion of the variation in stability. 
+#This suggests that additional factors, such as country-level effects and interactions 
+#with other environmental variables, are likely to play an important role.
+
+
+par(mfrow = c(2,2))
+plot(m1)
+par(mfrow = c(1,1))
+
+#log transformation
+data$log_stability <- log(data$stability.biomass.production)
+
+m_log <- lm(log_stability ~ target.species.richness, data = data)
+par(mfrow = c(2,2))
+plot(m_log)
+summary(m_log)
+sum_stability_species.richness_lm_log <- summary(m_log)
+
+capture.output(
+  print(sum_stability_species.richness_lm_log),
+  file = "output/tables/sum_stability_species.richness_lm_log.txt"
+)
+
+
+length(unique(data$target.species.richness))
+
+library(effects)
+eff_precip.lm <- effect("target.species.richness", m_log, partial.residuals = TRUE)
+plot(eff_precip.lm,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+
+#Log-transformed linear regression also showed a significant positive effect of 
+#target species richness on stability of biomass production (β = 0.065, p < 0.001). 
+#Model fit (R² ≈ 0.06) was nearly identical to the untransformed model, 
+#indicating that the inference is robust to log transformation.
+
+#target.species.richness => factor and ANOVA
+data$rich_f <- factor(data$target.species.richness)
+
+m_aov <- aov(log_stability ~ rich_f, data = data)
+
+summary(m_aov)
+sum_stability_species.richness_aov <- summary(m_aov)
+
+capture.output(
+  print(sum_stability_species.richness_aov),
+  file = "output/tables/sum_stability_species.richness_aov.txt"
+)
+
+emmeans(m_aov, pairwise ~ rich_f, adjust = "Tukey")
+
+emm_stability_species_richness <- emmeans(anova_sand, pairwise ~ sand, adjust = "Tukey")
+
+capture.output(
+  print(emm_res),
+  file = "output/tables/emm_stability_species_richness.txt"
+)
+
+#One-way ANOVA on log-transformed stability showed significant differences among species richness levels 
+#(F(4, 201) = 4.51, p = 0.0016). 
+#Post-hoc comparisons indicated that stability at intermediate richness levels (three and four species) was significantly higher 
+#than at the lowest richness level, while differences among higher richness levels were not significant.
+
+par(mfrow = c(2,2))
+plot(m_aov)
+par(mfrow = c(1,1))
+
+library(ggplot2)
+
+eff_precip.anova <- effect("rich_f", m_aov, partial.residuals = TRUE)
+plot(eff_precip.anova,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+
+#summary about single-linear regression and one-way anova
+#Residual diagnostics indicated a substantial improvement
+#when species richness was treated as a categorical variable in the ANOVA model. 
+#Using this ANOVA as a baseline model, significant differences in stability were 
+#detected primarily between intermediate richness levels (three and four species), 
+#whereas no significant differences were observed at higher richness levels. 
+#Overall, species richness appears to influence the stability of tree growth; 
+#however, the relationship is not strictly linear, and stability may increase mainly at intermediate levels of diversity.
+
+#Nevertheless, large variation in stability of biomass production was observed 
+#within each species richness level in both the categorical and linear models. 
+#This suggests that additional factors beyond species richness are likely to be important, 
+#and that mixed-effects models incorporating other environmental variables and interaction terms should be considered.
+
+#effect of country as random effect
+
+
+library(lme4)
+
+m1.lmer <- lmer(
+  log_stability ~ target.species.richness +
+    (1 | country),
+  data = data
+)
+par(mfrow = c(2,2))
+plot(m1.lmer)
+par(mfrow = c(1,1))
+
+summary(m1.lmer)
+sum_stability_species.richness_country.effect_lmer <- summary(m1.lmer)
+
+capture.output(
+  print(sum_stability_species.richness_country.effect_lmer),
+  file = "output/tables/sum_stability_species.richness_country.effect_lmer.txt"
+)
+
+
+#A linear mixed-effects model including country as a random effect confirmed a significant positive effect 
+#of target species richness on the stability of biomass production, 
+#indicating that the diversity effect is robust across countries.
+
+eff_precip_mixlm <- effect("target.species.richness", m1.lmer, partial.residuals = TRUE)
+plot(eff_precip_mixlm,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
+m1.lmer.anovamix <- lmer(
+  log_stability ~ rich_f +
+    (1 | country),
+  data = data
+)
+
+eff_precip.anovamix <- effect("rich_f", m1.lmer.anovamix, partial.residuals = TRUE)
+plot(eff_precip.anovamix,
+     main = "",
+     ylab = "log(Stability.biomass.production",
+     xlab = "target.species.richness")
