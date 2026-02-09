@@ -297,39 +297,71 @@ From the ANOVA and Post-hoc test (Tukey), we can see that Germany and Romania ha
 ## Question 4
 Does the relationship between stability and tree species richness in Romanian forests differ among forests with even vs. uneven age distribution? 
 
-First, to select the required data and set the categorical preditors as.factor(). Followed by diagnostic plots. 
 ```{r}
-stability.age <- fundiv[fundiv$country == "Romania",
-                        c("stability.biomass.production", 
-                           "target.species.richness", 
-                           "age.distribution")] 
-stability.age$target.species.richness <- as.factor(stability.age$target.species.richness)
-stability.age$age.distribution <- as.factor(stability.age$age.distribution)
-anova.stab.age <- lm(stability.biomass.production ~ target.species.richness * age.distribution, data = stability.age)
-par(mfrow = c(2, 2))
-plot(anova.stab.age)
-par(mfrow = c(1, 1))
-
-```
-Scale-Location plot shows the residual may be not homogeneous
-
-```{r}
-#log transform 
-stability.age$log.stability <- log(stability.age$stability.biomass.production +1)
-anova.stab.age <- lm(log.stability ~ target.species.richness * age.distribution, data = stability.age)
-par(mfrow = c(2, 2))
-plot(anova.stab.age)
-par(mfrow = c(1, 1))
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(car)
+library(tidyverse)
+library(ggeffects)
+library(effects)
+library(patchwork)
 ```
 
 ```{r}
-summary(anova.stab.age)
-anova(anova.stab.age)
+FunDivEUROPE <- read_csv("../Data/FunDivEUROPE.csv")
+Fun <- FunDivEUROPE[, c("country","stability.biomass.production","target.species.richness","age.distribution")]
+FunFilter <- Fun %>% filter(country == "Romania")
 ```
-Only accounting Romania has too limited data, which is unable to show significance towards the relationship between stability and species richness (\(F_{3, 21} = 3.11\), \(p = 0.05\)).
 
 ```{r}
-plot(allEffects(anova.stab.age), lines=list(multiline=TRUE))
+head(FunFilter)
+str(FunFilter)
+```
+```{r}
+FunFilter$age.distribution <- factor(FunFilter$age.distribution) # age as factor
+```
+```{r}
+Funancova <- lm(
+  stability.biomass.production ~ 
+    target.species.richness * age.distribution,
+  data = FunFilter
+)
+```
+```{r}
+par(mfrow = c(2,2))
+plot(Funancova)
+```
+
+looks okay to me??
+
+```{r}
+summary(Funancova)
+```
+The effect of tree species richness on stability does not differ between even- and uneven-aged forests.
+
+```{r}
+anova(Funancova)
+```
+### Conclusion
+
+significant effect of species richness on stability of biomass production (F₁,₂₄ = 7.61, p = 0.011)
+The interaction between species richness and age was not significant (F₁,₂₄ = 0.14, p = 0.71) so the richness–stability relationship did not differ between even- and uneven-aged forests
+
+```{r}
+plot.Fun <- ggplot(FunFilter, aes(y = stability.biomass.production, x = target.species.richness))+
+  geom_smooth(method = lm,  aes(col = age.distribution)) +
+  geom_point(
+    shape = 21,
+    size = 3,
+    alpha = 0.75,
+    fill = "black"
+  ) +
+  xlab("target.species.richness") +
+  ylab("stability.biomass.production") +
+  theme_bw()
+  
+plot.Fun
 ```
 ## Question 5
 Test the hypothesis that soil carbon stock (soil.carbon) depends on species richness, altitude, sand cover, annual mean temperature, and precipitation. 
